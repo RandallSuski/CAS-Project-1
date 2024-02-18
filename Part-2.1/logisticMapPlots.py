@@ -5,6 +5,7 @@ Created on Fri Feb 16 12:44:23 2024
 @author: randa
 """
 
+import math
 from matplotlib import pyplot
 
 'Returns the next x value based on the logistic equation'
@@ -47,11 +48,9 @@ for i in range(1, 201):
     panelBx02[i] = logEq(panelBx02[i-1], r2)
     panelCx01[i] = logEq(panelCx01[i-1], r3)
     panelCx02[i] = logEq(panelCx02[i-1], r3)
-    
-print(time)
-print(panelAx01)
-print(panelAx02)
 
+
+'''
 pyplot.figure(1)
 
 pyplot.plot(time, panelAx01, label="$x_0$ = 0.500")   
@@ -119,3 +118,47 @@ pyplot.ylabel('Relative Population Size')
 pyplot.title('Relative Population Over Time for R = 3.780 Zoomed In')
 pyplot.legend()
 pyplot.savefig('PanelCZoom.png', dpi=500, format='png', bbox_inches='tight', pad_inches=0.0,)
+'''
+
+
+
+'In order to develop a probability distribution we must discritize our data.'
+'We are going to consider a population of 100, and truncate the values'
+
+'Calculate Shannon Entropy of chaotic series (panel C)'
+discritizedDatax01 = [math.trunc(i * 100) for i in panelCx01]
+discritizedDatax02 = [math.trunc(i * 100) for i in panelCx02]
+
+'Find n where they diverge'
+n = 0
+for i in range(0, 201):
+    if (discritizedDatax01[i] != discritizedDatax02[i]):
+        n = i
+        break
+
+'Create probability distribution'
+probDistCx01nsmall = [0] * 100
+probDistCx01nbig = [0] * 100
+
+for i in range(0, n):
+    probDistCx01nsmall[discritizedDatax01[i]] += 1
+    
+for i in range(n, 201):
+    probDistCx01nbig[discritizedDatax01[i]] += 1
+    
+'Calculate Shannon Entropy'
+def shannonEnt(probDist):
+    entropy = 0
+    total = sum(probDist)
+    for i in probDist:
+        p = i/total
+        if p != 0.0:
+            entropy += p * math.log(p)
+    return -1 * entropy
+
+shannonEntnsmall = shannonEnt(probDistCx01nsmall)
+shannonEntnbig = shannonEnt(probDistCx01nbig)
+
+print('n where chaotic series diverges: ' + str(n))
+print('Shannon Entropy of values before n: ' + str(shannonEntnsmall))
+print('Shannon Entropy of values after n: ' + str(shannonEntnbig))
